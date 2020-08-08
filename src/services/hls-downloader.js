@@ -3,7 +3,7 @@ const fetch = require('node-fetch').default;
 const streamBuffers = require('stream-buffers');
 const m3u8Parser = require('m3u8-parser');
 
-const BLOCKS_SIZES = 20;
+const BLOCKS_SIZES = 25;
 
 // Parts Content-Type: video/MP2T
 function _downloadPart(partUrl) {
@@ -34,8 +34,10 @@ async function download(parts) {
 
 	for (let block of blocks) {
 		console.log(`Downloading block ${index++} of ${blocks.length}`);
+		const t0 = Date.now();
 		const blockData = await downloadBlock(block);
 		blockData.forEach(block => destinationStream.write(block));
+		console.log(`Block downloaded in ${Date.now() - t0} (ms).`);
 	}
 	console.log('All blocks downlaoded!');
 
