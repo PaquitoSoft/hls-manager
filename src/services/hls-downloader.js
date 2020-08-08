@@ -3,7 +3,7 @@ const fetch = require('node-fetch').default;
 const streamBuffers = require('stream-buffers');
 const m3u8Parser = require('m3u8-parser');
 
-const BLOCKS_SIZES = 25;
+const BLOCKS_SIZES = 20;
 
 // Parts Content-Type: video/MP2T
 function _downloadPart(partUrl) {
@@ -37,7 +37,7 @@ async function download(parts) {
 		const blockData = await downloadBlock(block);
 		blockData.forEach(block => destinationStream.write(block));
 	}
-	console.log('All clocks downlaoded!');
+	console.log('All blocks downlaoded!');
 
 	destinationStream.end();
 	return destinationStream;
@@ -53,22 +53,20 @@ function parse(rawText) {
 async function requestM3u8(url) {
 	const response = await fetch(url);
 	const raw = await response.text();
-	console.log('m3u8 file fetched:', raw);
 	return parse(raw);
 }
 
-async function execute(url) {
+module.exports.downloadFromHlsUrl = async function downloadFromHlsUrl(url) {
 	const t0 = Date.now();
 	console.log('Fetch url:', url);
 	const indexData = await requestM3u8(url);
-	console.log('Fetched data:', JSON.stringify(indexData, null, 2));
+	// console.log('Fetched data:', JSON.stringify(indexData, null, 2));
 	const t1 = Date.now();
 	const listIndexUrl = indexData.playlists[0].uri;
 	const listIndex = await requestM3u8(listIndexUrl);
 	const t2 = Date.now();
 	const downloadUrls = listIndex.segments.map(listItem => listItem.uri);
-
-	console.log('Downloading file...', downloadUrls[0]);
+	
 	const contentStream = await download(downloadUrls);
 	const t3 = Date.now();
 	console.log('Timetable:', {
@@ -77,45 +75,6 @@ async function execute(url) {
 		'downloadFile': t3 - t2,
 		'totalTime': t3 - t1
 	});
-
-	return contentStream.getContents();
-}
-
-exports.handler = async event => {
-	const url = event.queryStringParameters.url || '';
-
-	if (!url) {
-		return {
-			statusCode: 412,
-			body: 'You must provide an "url" param in the query string'
-		};
-	}
-
-	try {
-		new URL(url);
-	} catch {
-		console.error(error);
-		return {
-			statusCode: 412,
-			body: 'Provided "url" is not a valid URL: ' + url
-		};
-	}
 	
-	try {
-		const contents = await execute(url);
-		
-		return {
-			statusCode: 200,
-			headers: {
-				'Content-Type': 'video/MP2T'
-			},
-			body: contents
-		};
-	} catch (error) {
-		console.log(error);
-		return {
-			statusCode: 500,
-			body: error.message
-		};
-	}
+	return contentStream.getContents();
 };

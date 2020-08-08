@@ -5,15 +5,25 @@
   "main": "index.js",
   "scripts": {
     "dev": "netlify-lambda serve functions",
-    "build": "netlify-lambda build functions"
+    "build": "netlify-lambda build functions",
+    "start": "node ./src/main.js",
+    "debug": "nodemon --inspect ./src/main.js"
   },
   "author": "PaquitoSoft",
   "license": "ISC",
   "dependencies": {
+    "@hapi/boom": "^9.1.0",
+    "@hapi/hapi": "^19.2.0",
     "encoding": "^0.1.13",
     "m3u8-parser": "^4.4.0",
     "netlify-lambda": "^2.0.1",
     "node-fetch": "^2.6.0",
     "stream-buffers": "^3.0.2"
+  },
+  "engines": {
+    "node": "12.x"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.4"
   }
 }
