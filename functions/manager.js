@@ -53,12 +53,15 @@ function parse(rawText) {
 async function requestM3u8(url) {
 	const response = await fetch(url);
 	const raw = await response.text();
+	console.log('m3u8 file fetched:', raw);
 	return parse(raw);
 }
 
 async function execute(url) {
 	const t0 = Date.now();
+	console.log('Fetch url:', url);
 	const indexData = await requestM3u8(url);
+	console.log('Fetched data:', JSON.stringify(indexData, null, 2));
 	const t1 = Date.now();
 	const listIndexUrl = indexData.playlists[0].uri;
 	const listIndex = await requestM3u8(listIndexUrl);
