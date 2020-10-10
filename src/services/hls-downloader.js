@@ -3,7 +3,8 @@ const fetch = require('node-fetch').default;
 const streamBuffers = require('stream-buffers');
 const m3u8Parser = require('m3u8-parser');
 
-const BLOCKS_SIZES = 25;
+const BLOCKS_SIZES = 20;
+const cache = {};
 
 // Parts Content-Type: video/MP2T
 function _downloadPart(partUrl) {
@@ -59,6 +60,9 @@ async function requestM3u8(url) {
 }
 
 module.exports.downloadFromHlsUrl = async function downloadFromHlsUrl(url) {
+	if (cache[url]) {
+		return cache[url];
+	}
 	const t0 = Date.now();
 	console.log('Fetch url:', url);
 	const indexData = await requestM3u8(url);
@@ -78,5 +82,16 @@ module.exports.downloadFromHlsUrl = async function downloadFromHlsUrl(url) {
 		'totalTime': t3 - t1
 	});
 	
-	return contentStream.getContents();
+	cache[url] = contentStream.getContents();
+	return cache[url];
 };
+
+
+/*
+	blockSize: 25
+		- 62481
+		- 81479
+		- 21451
+		- 20246
+		- 19966
+*/
