@@ -17,7 +17,7 @@
     "encoding": "^0.1.13",
     "m3u8-parser": "^4.4.0",
     "netlify-lambda": "^2.0.1",
-    "node-fetch": "^2.6.0",
+    "node-fetch": "^2.6.7",
     "stream-buffers": "^3.0.2"
   },
   "engines": {
